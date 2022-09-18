@@ -14,6 +14,8 @@ function App() {
 
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
+  const [validated, setValidated] = useState(false);
+  const [error, setError] = useState('');
  
 
 
@@ -26,6 +28,21 @@ function App() {
   }
 
   const handleFormSubmit = event => {
+
+
+    const form = event.currentTarget;
+    if (form.checkValidity() === false) {
+    event.preventDefault();
+    event.stopPropagation();
+    return;
+    }
+    if (!/(?=^.{6,}$)((?=.*\d)(?=.*[A-Z])(?=.*[a-z])|(?=.*\d)(?=.*[^A-Za-z0-9])(?=.*[a-z])|(?=.*[^A-Za-z0-9])(?=.*[A-Z])(?=.*[a-z])|(?=.*\d)(?=.*[A-Z])(?=.*[^A-Za-z0-9]))^.*/.test(password)) {
+      setError('Password Should contain at least one special character, one numeric character, one upper case, one lower case');
+      return;
+    }
+
+
+    setValidated(true);
     
     createUserWithEmailAndPassword(auth, email, password)
     .then(result => {
@@ -43,7 +60,7 @@ function App() {
   return (
     <div className='container w-50 mx-auto mt-5'>
      
-        <Form onSubmit={handleFormSubmit}>
+        <Form noValidate validated={validated} onSubmit={handleFormSubmit}>
           <Form.Group className="mb-3" controlId="formBasicEmail">
             <Form.Label>Email address</Form.Label>
             <Form.Control onBlur={handleEmailBlur} type="email" placeholder="Enter email" />
@@ -54,8 +71,15 @@ function App() {
 
           <Form.Group className="mb-3" controlId="formBasicPassword">
             <Form.Label>Password</Form.Label>
-            <Form.Control onBlur={handlePasswordBlur} type="password" placeholder="Password" />
+            <Form.Control onBlur={handlePasswordBlur} type="password" placeholder="Password" required />
+
+            <Form.Control.Feedback type="invalid">
+            Please provide a valid zip.
+            </Form.Control.Feedback>
+
           </Form.Group>
+
+          <p className="text-danger">{error}</p>
         
           <Button variant="primary" type="submit">
             Submit
